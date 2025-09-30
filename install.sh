@@ -37,7 +37,7 @@ if [ ! -w "$(dirname "$WRAPPER_PATH")" ]; then
   fi
 fi
 
-cat <<EOF | $TEE "$WRAPPER_PATH" >/dev/null
+cat <<'EOF' | $TEE "$WRAPPER_PATH" >/dev/null
 #!/usr/bin/env bash
 DIR="$ROOT_DIR"
 exec "$DIR/.venv/bin/python" "$DIR/pu.py" "$@"
