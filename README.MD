@@ -14,6 +14,7 @@ curl -fsSL https://raw.githubusercontent.com/ariadev/pu/main/web-install.sh | ba
 ```
 Environment variables:
 - `PU_INSTALL_DIR` — target directory for cloning (default: `~/.pu-repo`)
+- `PU_AUTO_UPDATE=1` — non-interactive update (skip prompts)
 
 ### Recommended: Local installer from a clone
 ```bash
