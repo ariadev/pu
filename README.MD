@@ -6,16 +6,49 @@ pu converts natural language prompts into shell commands. It provides previews, 
 
 ## Installation
 
-From source:
+There are two simple, working options. The previously suggested "move pu.py to /usr/local/bin" fails with `ModuleNotFoundError: pu.cli` because the package isn't installed when the single file is moved.
+
+Option A — run from the repo (no system install):
 ```bash
 git clone https://github.com/ariadev/pu.git
 cd pu
-pip install -U openai
-chmod +x pu.py
-sudo mv pu.py /usr/local/bin/pu
+python3 -m pip install -U openai
+./pu.py -p "hello"
 ```
 
-Optional: use pipx/venv to isolate dependencies.
+Option B — create a small wrapper script (global `pu` command):
+```bash
+git clone https://github.com/ariadev/pu.git
+cd pu
+python3 -m pip install -U openai
+
+# install a tiny launcher that keeps the repo on PYTHONPATH
+sudo tee /usr/local/bin/pu >/dev/null <<'EOF'
+#!/usr/bin/env bash
+DIR="/absolute/path/to/your/pu"   # <- replace with your clone path
+export PYTHONPATH="$DIR"
+exec python3 "$DIR/pu.py" "$@"
+EOF
+sudo chmod +x /usr/local/bin/pu
+
+# test
+pu -p "list large files"
+```
+
+Optional: use pipx/venv to isolate dependencies if you prefer.
+
+Option C — one‑shot installer (recommended):
+```bash
+# from inside the repo root
+bash install.sh
+# this creates a virtualenv at .venv, installs openai, and adds /usr/local/bin/pu
+```
+
+Uninstall (script-based install):
+```bash
+sudo rm -f /usr/local/bin/pu
+rm -rf .venv
+```
 
 ---
 
