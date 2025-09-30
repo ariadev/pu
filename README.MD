@@ -6,17 +6,24 @@ pu converts natural language prompts into shell commands. It provides previews, 
 
 ## Installation
 
-There are two simple, working options. The previously suggested "move pu.py to /usr/local/bin" fails with `ModuleNotFoundError: pu.cli` because the package isn't installed when the single file is moved.
+Choose one of the recommended methods below.
 
-Option A — run from the repo (no system install):
+### Recommended: Web installer (one‑liner)
+```bash
+curl -fsSL https://raw.githubusercontent.com/ariadev/pu/main/web-install.sh | bash
+```
+Environment variables:
+- `PU_INSTALL_DIR` — target directory for cloning (default: `~/.pu-repo`)
+
+### Recommended: Local installer from a clone
 ```bash
 git clone https://github.com/ariadev/pu.git
 cd pu
-python3 -m pip install -U openai
-./pu.py -p "hello"
+bash install.sh
+# creates .venv, installs openai, and adds /usr/local/bin/pu
 ```
 
-Option B — create a small wrapper script (global `pu` command):
+### Manual: global wrapper (advanced)
 ```bash
 git clone https://github.com/ariadev/pu.git
 cd pu
@@ -35,16 +42,17 @@ sudo chmod +x /usr/local/bin/pu
 pu -p "list large files"
 ```
 
-Optional: use pipx/venv to isolate dependencies if you prefer.
-
-Option C — one‑shot installer (recommended):
+### Manual: run directly from the repo
 ```bash
-# from inside the repo root
-bash install.sh
-# this creates a virtualenv at .venv, installs openai, and adds /usr/local/bin/pu
+git clone https://github.com/ariadev/pu.git
+cd pu
+python3 -m pip install -U openai
+./pu.py -p "hello"
 ```
 
-Uninstall (script-based install):
+Optional: use pipx/venv to isolate dependencies if you prefer.
+
+### Uninstall (script-based installs)
 ```bash
 sudo rm -f /usr/local/bin/pu
 rm -rf .venv
