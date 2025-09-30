@@ -9,8 +9,12 @@ def handle_doctor(args, config):
     import sys
     pyver = sys.version.split()[0]
     print(f"Python: {pyver}")
-    api_key = config.get("openai", {}).get("api_key")
-    model = config.get("openai", {}).get("model")
+    api_key = None
+    model = None
+    if config.has_section("openai"):
+        section = config["openai"]
+        api_key = section.get("api_key")
+        model = section.get("model")
     if not api_key or api_key == "your_api_key_here":
         problems.append("OpenAI API key missing or placeholder in ~/.puconfig or env")
     else:

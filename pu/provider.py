@@ -2,6 +2,7 @@ import re
 import time
 from typing import Tuple
 from openai import OpenAI
+import shlex
 
 
 def heuristic_command_from_prompt(prompt: str) -> str:
@@ -20,7 +21,7 @@ def heuristic_command_from_prompt(prompt: str) -> str:
         return "docker container prune -f && docker image prune -f"
     if "tar" in p or "archive" in p:
         return "tar -czvf archive.tar.gz *.txt"
-    return f"echo '{prompt.replace("'", "'\\''")}'"
+    return f"echo {shlex.quote(prompt)}"
 
 
 def generate_command_with_retries(prompt: str, context: str, model: str, api_key: str) -> Tuple[str, str]:
