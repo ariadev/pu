@@ -1,143 +1,146 @@
-# 🐚 pu – Natural Language CLI Assistant
+## 🐚 pu — Natural Language CLI Assistant
 
-`pu` lets you run shell commands using natural language.  
-Instead of remembering complex syntax, just describe what you want and let `pu` generate the command, show it, and (optionally) run it.
+pu turns natural language into shell commands. It previews, explains, and safely executes commands with guardrails, history, and tooling to iterate.
 
----
-
-## 📦 Installation
-
-1. Clone or download the script:
-
-   ```bash
-   git clone https://github.com/ariadev/pu.git
-   cd pu
-   ```
-
-2. Make it executable:
-
-   ```bash
-   chmod +x pu.py
-   ```
-
-3. Move to your PATH:
-
-   ```bash
-   sudo mv pu.py /usr/local/bin/pu
-   ```
-
-Now you can run `pu` anywhere in your terminal.
+Highlights:
+- Safety guardrails, double confirmation for high‑risk ops
+- Secrets redaction everywhere we print or log
+- Dry‑run previews and per‑line review for multi‑line commands
+- JSONL history with grep and replay
+- Configurable model and offline heuristic fallback
+- Templates/macros, profiles, and context controls
+- Subcommands: `history`, `doctor`, `why`, `edit`
 
 ---
 
-## ⚙️ Dependencies
+## Installation
 
-* Python **3.9+**
-* [OpenAI Python SDK](https://pypi.org/project/openai/)
-
-Install with:
-
+From source:
 ```bash
-pip install openai
+git clone https://github.com/ariadev/pu.git
+cd pu
+pip install -U openai
+chmod +x pu.py
+sudo mv pu.py /usr/local/bin/pu
 ```
+
+Optional: use pipx/venv to isolate dependencies.
 
 ---
 
-## 🔑 Configuration
+## Configuration
 
-On first run, `pu` will create a config file at:
+First run creates `~/.puconfig`.
 
-```
-~/.puconfig
-```
-
-Example boilerplate:
-
+Minimal example:
 ```ini
 [openai]
 api_key = sk-your-api-key-here
 model = gpt-4o-mini
+
+[templates]
+# Example macro used with: pu -p ":git-clean"
+git-clean = git fetch && git reset --hard origin/main && git clean -fdx
 ```
 
-You can edit this file to change the default model or API key.
+Environment variable `OPENAI_API_KEY` is respected on first write.
 
 ---
 
-## 🚀 Usage
+## Usage
 
-### Basic prompt
+Basic:
+```bash
+pu -p "list large files in the current directory"
+```
+
+Dry‑run with previews:
+```bash
+pu -p "rm -rf build dist" --dry-run
+```
+
+File context (depth with ignore and cap):
+```bash
+pu -p "zip project" --with-files 2 --context-ignore node_modules --context-max 200
+```
+
+Choose model and profile:
+```bash
+pu -p "create tar of txt files" --model gpt-4o-mini --profile safe
+```
+
+---
+
+## Subcommands
+
+History (JSONL):
+```bash
+pu history --last 50
+pu history --grep docker
+pu history --last 10 --replay 3
+```
+
+Doctor (env/config check):
+```bash
+pu doctor
+```
+
+Why (brief explanation):
+```bash
+pu why            # last
+pu why --index 2  # specific
+```
+
+Edit (iterate on last/specific command):
+```bash
+pu edit --instruction "add sudo" --dry-run
+pu edit --index 3 --instruction "exclude node_modules"
+```
+
+---
+
+## Safety and Guardrails
+
+- Risk analysis flags destructive patterns (e.g., `rm -rf /`, `curl | sh`).
+- High‑risk requires double confirmation (type the exact command).
+- Medium‑risk shows warnings; in `--profile safe`, optional challenge.
+- Per‑line review for multi‑line commands.
+
+---
+
+## Secrets and Privacy
+
+- Secrets redacted in output and legacy text history.
+- JSONL keeps raw command for replay locally only.
+- Use `pu history --grep` to search; `--replay` re‑executes with confirmation.
+
+---
+
+## Offline Fallback
+
+If the provider is unavailable, pu falls back to a safe heuristic generator and logs `provider=heuristic` in history.
+
+---
+
+## Examples
 
 ```bash
-pu -p "list all files in this directory"
-```
-
-Example output:
-
-```
-📝 Command generated:
-ls -lh
-
-Run this command? [y/N]
+pu -p ":git-clean"
+pu -p "start a python http server on port 8080"
+pu -p "docker remove all stopped containers"
 ```
 
 ---
 
-### Dry-run (don’t execute)
+## Troubleshooting
 
-```bash
-pu -p "delete all .tmp files" --dry-run
-```
-
-Output:
-
-```
-📝 Command generated:
-rm *.tmp
-
-💡 Dry run mode: command not executed.
-```
+- Run `pu doctor` to validate config and environment.
+- If OpenAI is not installed, install with `pip install openai`.
+- Use `--dry-run` if unsure; read risk warnings carefully.
 
 ---
 
-### With file context
+## Notes
 
-```bash
-pu -p "unzip all files except ones starting with _" --with-files 1
-```
-
-This sends your prompt + the file tree (depth = 1) to OpenAI so it can generate more context-aware commands.
-
----
-
-### History
-
-Every run (prompt, command, executed or not) is logged in:
-
-```
-~/.pu_history
-```
-
-Example:
-
-```
-[2025-09-29T13:45:10]
-Prompt: delete all .tmp files
-Command: rm *.tmp
-Executed: False
-```
-
----
-
-## 💡 Use Cases
-
-* `pu -p "rename all .jpg files to .png"`
-* `pu -p "start a python http server on port 8080"`
-* `pu -p "create a tar.gz archive of all txt files"`
-* `pu -p "git reset hard to origin/main"`
-* `pu -p "docker remove all stopped containers"`
-
----
-
-⚠️ **Warning:** Commands are generated by AI. Always check them before execution!
-Use `--dry-run` if unsure.
+Commands are generated by AI. Always review before executing. Use `--dry-run` to preview.
 
